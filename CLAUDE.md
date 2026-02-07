@@ -1,32 +1,48 @@
 # CLAUDE.md
 
-> AI assistant guide for the NVDA Options Analyzer repository
+> AI assistant guide for the Options Analysis Toolkit
 
 ## Project Overview
 
-This is a Python-based financial analysis tool that retrieves and displays NVIDIA (NVDA) stock options data using the Yahoo Finance API.
+A collection of Python-based financial analysis tools for stock options data, including options chain viewers and an implied volatility calculator using Black-Scholes pricing.
 
 ### What This Project Does
-- Fetches current NVDA stock price information
+- Fetches current stock prices and options chains (NVDA, AAPL)
 - Lists available options expiration dates
-- Displays options chains (calls and puts) near the current stock price
-- Filters options within ±15% of the current price for relevance
+- Displays calls and puts near the money (±15% of current price)
+- Calculates implied volatility using Black-Scholes model with Brent's method
+- Provides a `/iv` skill for quick IV calculations from the CLI
 
 ## Codebase Structure
 
 ```
 /
-├── nvda_options.py    # Main script for fetching and displaying options data
-├── CLAUDE.md          # This file - AI assistant guidelines
-└── .git/              # Git repository
+├── CLAUDE.md                          # This file - AI assistant guidelines
+├── scripts/
+│   ├── nvda_options.py                # NVDA options chain viewer
+│   ├── aapl_options.py                # AAPL options chain viewer
+│   └── options_vol_calculator.py      # Interactive IV calculator (Black-Scholes)
+└── skills/
+    └── iv/
+        └── SKILL.md                   # /iv slash command definition
 ```
 
-### Key File
+### Key Files
 
-**`nvda_options.py`** - Single-file script containing all functionality:
+**`scripts/nvda_options.py`** / **`scripts/aapl_options.py`** - Options chain viewers:
 - Stock data retrieval via `yfinance.Ticker`
-- Options chain fetching and filtering
+- Options chain fetching and filtering (±15% of current price)
 - Formatted console output
+
+**`scripts/options_vol_calculator.py`** - Implied volatility calculator:
+- Black-Scholes pricing with dividend yield
+- IV solving via `scipy.optimize.brentq`
+- Fetches live underlying price from Yahoo Finance API
+- Supports up to 3 option prices per calculation
+
+**`skills/iv/SKILL.md`** - Claude Code skill for quick IV calculations:
+- Usage: `/iv TICKER EXP_DATE STRIKE call/put VAL_DATE PRICE_A [PRICE_B] [PRICE_C]`
+- Example: `/iv AAPL 3/31/2026 300 call 1/31/2026 10 20`
 
 ## Dependencies
 
@@ -34,25 +50,27 @@ This is a Python-based financial analysis tool that retrieves and displays NVIDI
 |---------|---------|
 | `yfinance` | Yahoo Finance API wrapper for stock/options data |
 | `pandas` | Data manipulation (implied by yfinance, used for DataFrames) |
+| `scipy` | Brent's method for IV solving, normal distribution for Black-Scholes |
 
 ### Installation
 
 ```bash
-pip install yfinance
+pip install yfinance scipy
 ```
 
 ## Development Workflow
 
-### Running the Script
+### Running Scripts
 
 ```bash
-python nvda_options.py
+python scripts/nvda_options.py
+python scripts/aapl_options.py
+python scripts/options_vol_calculator.py
 ```
 
-### Expected Output
-1. Current NVDA stock price and previous close
-2. First 10 available options expiration dates
-3. Calls and puts near the money for the nearest expiration
+### Using the IV Skill
+
+From Claude Code CLI, use the `/iv` slash command for quick calculations.
 
 ## Code Conventions
 
@@ -67,25 +85,6 @@ python nvda_options.py
 - Filter DataFrames using boolean indexing
 - Display relevant columns only (strike, lastPrice, bid, ask, volume, impliedVolatility)
 
-## Common Tasks for AI Assistants
-
-### Adding New Stock Symbols
-To analyze a different stock, modify the ticker symbol:
-```python
-stock = yf.Ticker("SYMBOL")
-```
-
-### Adjusting Price Range Filter
-The ±15% filter can be modified in lines 31-32:
-```python
-low = current_price * 0.85   # -15%
-high = current_price * 1.15  # +15%
-```
-
-### Adding New Data Fields
-Options chain DataFrames include additional columns:
-- `openInterest`, `inTheMoney`, `contractSize`, `currency`, `lastTradeDate`
-
 ## Testing Considerations
 
 - **Network dependency**: Requires internet access to Yahoo Finance
@@ -94,14 +93,16 @@ Options chain DataFrames include additional columns:
 
 ## Git Workflow
 
+- **Always run `git pull` at the start of every session** before doing any work
 - Branch naming: `claude/<description>-<session-id>`
 - Commit messages should be descriptive of changes
 - Push to feature branches, not directly to main
 
 ## Notes for AI Assistants
 
-1. This is a single-file project - keep it simple
+1. Keep scripts simple and self-contained
 2. The yfinance API can change; check documentation if errors occur
 3. Stock data is real-time during market hours, delayed otherwise
 4. Options data structure depends on yfinance version
 5. Always handle potential `None` values from API responses
+6. The Yahoo Finance chart API (`query1.finance.yahoo.com`) is used as a lightweight alternative to yfinance for fetching just the current price
