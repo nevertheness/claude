@@ -15,3 +15,5 @@ python scripts/options_vol_calculator.py $ARGUMENTS
 ```
 
 The script accepts dates in M/D/YYYY or YYYY-MM-DD format and fetches the live underlying price automatically.
+
+Example usage: `/iv AAPL 3/31/2026 300 call 1/31/2026 10 20`
