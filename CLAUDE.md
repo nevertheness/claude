@@ -30,9 +30,9 @@ No test suite, linter, or build step exists. Scripts are run directly.
 
 - **`scripts/nvda_options.py`** / **`scripts/aapl_options.py`** — Standalone options chain viewers using `yfinance.Ticker`. Filter to ±15% of current price. Nearly identical; only the ticker symbol differs.
 - **`scripts/options_vol_calculator.py`** — IV calculator with two modes (interactive and CLI). Uses `scipy.optimize.brentq` for solving and the Yahoo Finance chart API (`query1.finance.yahoo.com`) as a lightweight price source instead of yfinance. Supports dividend yield in Black-Scholes pricing.
-- **`skills/iv/SKILL.md`** — `/iv` slash command: directly invokes `options_vol_calculator.py` CLI.
+- **`.claude/skills/iv/SKILL.md`** — `/iv` slash command: directly invokes `options_vol_calculator.py` CLI.
 
-Skills must be copied to `~/.claude/skills/<name>/SKILL.md` for Claude Code to discover them. Don't use symlinks.
+Skills live under `.claude/skills/` in the repo. The session-start hook copies them to `~/.claude/skills/<name>/SKILL.md` automatically. Don't use symlinks.
 
 ## Dependencies
 
