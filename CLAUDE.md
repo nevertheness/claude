@@ -4,17 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Options Analysis Toolkit — Python CLI tools for stock options data. Fetches options chains via yfinance, displays near-the-money calls/puts, and calculates implied volatility using Black-Scholes with Brent's method.
+Options Analysis Toolkit — calculates implied volatility using Black-Scholes with Brent's method.
 
 ## Commands
 
 ```bash
 # Install dependencies
-pip install yfinance scipy
-
-# Run options chain viewers
-python scripts/nvda_options.py
-python scripts/aapl_options.py
+pip install scipy
 
 # IV calculator - interactive mode
 python scripts/options_vol_calculator.py
@@ -28,22 +24,20 @@ No test suite, linter, or build step exists. Scripts are run directly.
 
 ## Architecture
 
-- **`scripts/nvda_options.py`** / **`scripts/aapl_options.py`** — Standalone options chain viewers using `yfinance.Ticker`. Filter to ±15% of current price. Nearly identical; only the ticker symbol differs.
-- **`scripts/options_vol_calculator.py`** — IV calculator with two modes (interactive and CLI). Uses `scipy.optimize.brentq` for solving and the Yahoo Finance chart API (`query1.finance.yahoo.com`) as a lightweight price source instead of yfinance. Supports dividend yield in Black-Scholes pricing.
+- **`scripts/options_vol_calculator.py`** — IV calculator with two modes (interactive and CLI). Uses `scipy.optimize.brentq` for solving and the Yahoo Finance chart API (`query1.finance.yahoo.com`) as a lightweight price source. Supports dividend yield in Black-Scholes pricing.
 - **`.claude/skills/iv/SKILL.md`** — `/iv` slash command: directly invokes `options_vol_calculator.py` CLI.
 
-Skills live under `.claude/skills/` in the repo. The session-start hook copies them to `~/.claude/skills/<name>/SKILL.md` automatically. Don't use symlinks.
+Skills live under `.claude/skills/` in the repo. The session-start hook copies them to `~/.claude/skills/<name>/SKILL.md` automatically at session start. Don't use symlinks.
 
 ## Dependencies
 
-`yfinance` (options chain data), `scipy` (Brent's method + normal distribution for Black-Scholes), `pandas` (implicit via yfinance).
+`scipy` (Brent's method + normal distribution for Black-Scholes).
 
 ## Code Conventions
 
-- Descriptive variable names (e.g., `nearest_exp`, `current_price`)
+- Descriptive variable names
 - Console section headers with `===` formatting
 - Use `.get()` with fallback values on dict keys from API responses
-- Filter DataFrames with boolean indexing; display only: strike, lastPrice, bid, ask, volume, impliedVolatility
 - f-strings for formatting
 - Handle potential `None` values from Yahoo Finance API responses
 
@@ -55,7 +49,6 @@ Skills live under `.claude/skills/` in the repo. The session-start hook copies t
 
 ## Notes
 
-- Network access to Yahoo Finance required for all scripts
+- Network access to Yahoo Finance required
 - Data freshness varies with market hours; rate limiting possible
-- The yfinance API can change across versions; check docs if errors occur
-- The Yahoo Finance chart API is used in `options_vol_calculator.py` as a lightweight alternative to the full yfinance library for fetching current price only
+- The Yahoo Finance chart API (`query1.finance.yahoo.com`) is used for fetching current price only
